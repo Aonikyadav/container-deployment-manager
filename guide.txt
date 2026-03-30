@@ -1,0 +1,119 @@
+=== CONTAINER DEPLOYMENT MANAGER GUIDE ===
+
+This document explains how the project works, what inputs to provide, and what outputs to expect.
+
+# 1. PREREQUISITES
+Before checking the project, you must have the following running on your Windows machine:
+- Node.js installed (v16+)
+- MongoDB running locally on default port 27017
+- Docker Desktop installed and running (The manager uses Docker CLI behind the scenes)
+
+# 2. STARTING THE MANAGER
+1. Open a terminal in the `container-deployment-manager` folder.
+2. Run `npm install` (already done by the AI).
+3. Run `npm run start` or `node src/app.js`.
+4. You should see:
+   "Server is running on port 3000"
+   "Connected to MongoDB successfully"
+
+# 3. HOW IT WORKS & HOW TO TEST IT
+
+The project acts like a mini-Kubernetes. You use REST APIs (like Postman or curl/Invoke-RestMethod) to tell it what Docker container to run.
+
+---
+STEP A: Check the Health of the API
+Action: Send a GET request to see if it's alive.
+Command (PowerShell):
+Invoke-RestMethod -Uri http://localhost:3000/health
+
+Expected Output:
+{
+  "status": "ok",
+  "message": "Container Deployment Manager API is running."
+}
+
+---
+STEP B: Create a New Deployment Configuration
+Action: Tell the system you WANT to deploy an application (e.g., an Nginx web server). This only saves the configuration in MongoDB, it does NOT start the container yet.
+Command (PowerShell):
+$body = @{
+    name = "my-web-app"
+    image = "nginx:latest"
+    version = "1.0.0"
+    targetPort = 80
+} | ConvertTo-Json
+
+After running that , run this code :
+Invoke-RestMethod -Uri http://localhost:3000/api/deployments -Method Post -Body $body -ContentType "application/json" | ConvertTo-Json
+
+
+Expected Output:
+It will return a JSON object containing the Deployment ID, showing it is in "pending" status, and has assigned internal "bluePort" and "greenPort".
+
+---
+STEP C: Trigger the Actual Deployment (Blue-Green Strategy)
+Action: Tell the system to actually launch the Docker container using the configuration you just created.
+* Replace `<DEPLOYMENT_ID>` with the `_id` received in Step B.
+
+Command (PowerShell):
+
+# 1. Fetch all deployments from the API.
+
+$deployments = Invoke-RestMethod -Uri http://localhost:3000/api/deployments -Method Get
+
+# 2. Grab the ID of the most recent deployment.
+
+$deploymentId = $deployments.data[0]._id
+Write-Output "Found Deployment ID: $deploymentId"
+
+# 3. Trigger the deployment (Step C).
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/deployments/$deploymentId/deploy" -Method Post | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/deployments/$deploymentId/deploy" -Method Post -Body "{}" -ContentType "application/json" | ConvertTo-Json
+
+
+
+What Happens Behind the Scenes:
+1. The Node.js Orchestration Engine runs `docker run -d --name my-web-app-blue-... nginx:latest`
+2. It waits 5 seconds for the container to become "healthy".
+3. It switches the internal Proxy traffic to point to this new container's port.
+
+Expected Output:
+JSON containing the deployment details, now showing status: "running" and currentEnvironment: "blue".
+
+---
+STEP D: Access Your Application via the Reverse Proxy
+Action: Now that the container is running securely behind our system, you want to view it. Our reverse proxy automatically routes traffic to the active (blue or green) container.
+Command (Browser or PowerShell):
+Open your browser and go to:
+http://localhost:3000/proxy/my-web-app
+
+Expected Output:
+You should see the default "Welcome to nginx!" HTML page. The proxy seamlessly forwarded your request from port 3000 to the hidden Docker container port!
+
+---
+STEP E: Updating to a New Version (Simulating Zero Downtime)
+Action: Let's pretend you want to update from version 1.0.0 to 1.1.0 without dropping traffic.
+Command (PowerShell):
+$body = @{ version = "1.1.0" } | ConvertTo-Json
+Invoke-RestMethod -Uri http://localhost:3000/api/deployments/<DEPLOYMENT_ID>/deploy -Method Post -Body $body -ContentType "application/json"
+
+What Happens Behind the Scenes:
+1. The system detects "blue" is currently active.
+2. It launches the new container in the "green" environment.
+3. Once the new "green" container is healthy, it instantly updates the proxy routing table to point to "green".
+4. It shuts down and cleans up the old "blue" Docker container.
+Result: Zero-downtime deployment!
+
+# 4. VIEWING THE LOGS AND HISTORY
+
+- To see the history of a deployment (old versions):
+  Invoke-RestMethod -Uri http://localhost:3000/api/deployments/<DEPLOYMENT_ID>/history
+
+- To view the raw Docker logs for the currently running app container:
+  Invoke-RestMethod -Uri http://localhost:3000/api/deployments/<DEPLOYMENT_ID>/logs
+
+# 5. SHELL SCRIPT INJECTION (ADVANCED)
+
+Inside the `scripts/setup-env.sh` file, there is a template. In a real-world scenario, you would bundle this script inside your own custom Dockerfiles (e.g., `COPY scripts/setup-env.sh /usr/local/bin/`). It serves as an entrypoint that dynamically reads the environment variables the Deployment Manager injects before booting the actual application.
