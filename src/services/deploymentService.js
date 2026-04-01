@@ -64,8 +64,16 @@ class DeploymentService {
     
     try {
       // 1. Run the new container
+      // Strip any tag already embedded in the image name (e.g. "nginx:latest" → "nginx")
+      // then re-attach the canonical version tag.
+      const baseImage = deployment.image.includes(':')
+        ? deployment.image.split(':')[0]
+        : deployment.image;
+      const tag = (deployment.version && deployment.version.trim()) ? deployment.version.trim() : 'latest';
+      const fullImage = `${baseImage}:${tag}`;
+
       const dockerId = await dockerService.runContainer({
-        image: deployment.image,
+        image: fullImage,
         name: containerName,
         envVars: deployment.envVars,
         hostPort,
@@ -107,8 +115,10 @@ class DeploymentService {
 
       for (const oldCont of oldContainers) {
         console.log(`Stopping and removing old container ${oldCont.name}...`);
-        await dockerService.stopContainer(oldCont.dockerId);
-        await dockerService.removeContainer(oldCont.dockerId);
+        try {
+          await dockerService.stopContainer(oldCont.dockerId);
+          await dockerService.removeContainer(oldCont.dockerId);
+        } catch(e) { console.error('Error stopping container via docker', e.message); }
         oldCont.status = 'stopped';
         oldCont.stoppedAt = new Date();
         await oldCont.save();
