@@ -70,6 +70,7 @@ class DeploymentService {
 
     // 0. Pull image once before replica loop for maximum speed
     try {
+<<<<<<< HEAD
       await dockerService.pullImage(deployment.image);
     } catch (e) {
       console.warn(`[ORCHESTRATOR] Initial pull for ${deployment.image} failed, proceeding with cache.`);
@@ -93,8 +94,19 @@ class DeploymentService {
       
       console.log(`[ORCHESTRATOR] Launching container on port ${hostPort}...`);
       
+=======
+      // 1. Run the new container
+      // Strip any tag already embedded in the image name (e.g. "nginx:latest" → "nginx")
+      // then re-attach the canonical version tag.
+      const baseImage = deployment.image.includes(':')
+        ? deployment.image.split(':')[0]
+        : deployment.image;
+      const tag = (deployment.version && deployment.version.trim()) ? deployment.version.trim() : 'latest';
+      const fullImage = `${baseImage}:${tag}`;
+
+>>>>>>> 9863574c5f40b0e7c4ae7261cac98ab0663b247e
       const dockerId = await dockerService.runContainer({
-        image: deployment.image,
+        image: fullImage,
         name: containerName,
         envVars: deployment.envVars,
         hostPort,
@@ -166,9 +178,17 @@ class DeploymentService {
       });
 
       for (const oldCont of oldContainers) {
+<<<<<<< HEAD
         console.log(`Stopping and removing old replica ${oldCont.name}...`);
         await dockerService.stopContainer(oldCont.dockerId);
         await dockerService.removeContainer(oldCont.dockerId);
+=======
+        console.log(`Stopping and removing old container ${oldCont.name}...`);
+        try {
+          await dockerService.stopContainer(oldCont.dockerId);
+          await dockerService.removeContainer(oldCont.dockerId);
+        } catch(e) { console.error('Error stopping container via docker', e.message); }
+>>>>>>> 9863574c5f40b0e7c4ae7261cac98ab0663b247e
         oldCont.status = 'stopped';
         oldCont.stoppedAt = new Date();
         await oldCont.save();
