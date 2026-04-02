@@ -12,7 +12,9 @@ const CreateDeployment = () => {
     name: '',
     image: '',
     version: 'latest',
-    targetPort: 80
+    targetPort: 80,
+    repoUrl: '',
+    postStartScript: ''
   });
 
   const [envVars, setEnvVars] = useState([{ key: '', value: '' }]);
@@ -131,6 +133,29 @@ const CreateDeployment = () => {
                 placeholder="80" 
               />
             </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Git Repository URL</label>
+              <input 
+                name="repoUrl" 
+                value={formData.repoUrl} 
+                onChange={handleChange} 
+                placeholder="https://github.com/user/repo" 
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Post-Start Shell Script</label>
+            <textarea 
+              name="postStartScript" 
+              value={formData.postStartScript} 
+              onChange={handleChange} 
+              placeholder="e.g. touch /app/ready.txt && echo 'Hello' > /app/hello.txt" 
+              style={{ minHeight: '80px', fontFamily: 'monospace' }}
+            />
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '16px 0' }} />

@@ -8,28 +8,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        setUser(JSON.parse(userData));
+      }
+    } catch (e) {
+      console.error('Failed to restore auth session:', e);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    const res = await axios.post('http://localhost:3000/api/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data));
-    setUser(res.data);
+    const res = await axios.post('/api/auth/login', { email, password });
+    const authData = res.data.data || res.data;
+    localStorage.setItem('token', authData.token);
+    localStorage.setItem('user', JSON.stringify(authData));
+    setUser(authData);
     return res;
   };
 
   const register = async (name, email, password) => {
-    const res = await axios.post('http://localhost:3000/api/auth/register', { name, email, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data));
-    setUser(res.data);
+    const res = await axios.post('/api/auth/register', { name, email, password });
+    const authData = res.data.data || res.data;
+    localStorage.setItem('token', authData.token);
+    localStorage.setItem('user', JSON.stringify(authData));
+    setUser(authData);
     return res;
   };
 
@@ -41,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

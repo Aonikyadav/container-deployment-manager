@@ -2,12 +2,27 @@ const deploymentService = require('../services/deploymentService');
 const Deployment = require('../models/Deployment');
 const Container = require('../models/Container');
 const dockerService = require('../services/dockerService');
+const httpProxy = require('http-proxy');
+
+const proxy = httpProxy.createProxyServer({});
 
 exports.createDeployment = async (req, res) => {
   try {
-    const { name, image, version, targetPort, envVars } = req.body;
-    const deployment = await deploymentService.createDeployment({ name, image, version, targetPort, envVars, userId: req.user.id });
-    res.status(201).json({ message: 'Deployment initialized', data: deployment });
+    const { name, image, version, targetPort, envVars, replicas, repoUrl, postStartScript } = req.body;
+    console.log(`[DEBUG] Creating deployment ${name} with replicas:`, replicas);
+    const deployment = await deploymentService.createDeployment({ 
+      name, image, version, targetPort, envVars, userId: req.user.id, 
+      replicas: replicas ? parseInt(replicas) : 1, 
+      repoUrl, postStartScript 
+    });
+    
+    // Auto-trigger deployment immediately for better UX
+    console.log(`[DEBUG] Auto-triggering deployment for ${name} after creation...`);
+    deploymentService.triggerDeployment(deployment._id).catch(err => {
+      console.error(`[ERROR] Auto-deploy failed for ${name}:`, err.message);
+    });
+
+    res.status(201).json({ message: 'Deployment initialized and triggering...', data: deployment });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -89,3 +104,4 @@ exports.scaleDeployment = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+

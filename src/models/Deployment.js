@@ -18,9 +18,11 @@ const deploymentSchema = new mongoose.Schema({
     enum: ['none', 'blue', 'green'],
     default: 'none'
   },
-  activePort: { type: Number }, // Port exposed by proxy or the active port
-  bluePort: { type: Number }, // Internal exposed port for blue environment
-  greenPort: { type: Number } // Internal exposed port for green environment
+  activePorts: { type: [Number], default: [] }, // Ports exposed by proxy or the active replicas
+  bluePorts: { type: [Number], default: [] }, // Internal exposed ports for blue replicas
+  greenPorts: { type: [Number], default: [] }, // Internal exposed ports for green replicas
+  repoUrl: { type: String }, // Git repository URL for the project
+  postStartScript: { type: String } // Optional shell script to run after container is healthy
 }, { timestamps: true });
 
 module.exports = mongoose.model("Deployment", deploymentSchema);

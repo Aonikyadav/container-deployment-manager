@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Activity, User as UserIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Activity, User as UserIcon, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -46,6 +46,24 @@ const Navbar = () => {
           <LayoutDashboard size={18} />
           Dashboard
         </NavLink>
+
+        {user && user.role === 'admin' && (
+          <NavLink 
+            to="/admin" 
+            style={({ isActive }) => ({
+              textDecoration: 'none',
+              color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              fontWeight: isActive ? '600' : '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: '0.2s'
+            })}
+          >
+            <Shield size={18} />
+            Admin Panel
+          </NavLink>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

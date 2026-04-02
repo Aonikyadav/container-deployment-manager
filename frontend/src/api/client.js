@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -30,5 +30,9 @@ export default {
   getLogs: (id) => apiClient.get(`/deployments/${id}/logs`),
   
   // Scaling
-  scaleDeployment: (id, replicas) => apiClient.put(`/deployments/${id}/scale`, { replicas })
+  scaleDeployment: (id, replicas) => apiClient.post(`/deployments/${id}/scale`, { replicas }),
+
+  // Admin
+  getAdminStats: () => apiClient.get('/admin/stats'),
+  getAdminUsers: () => apiClient.get('/admin/users')
 };

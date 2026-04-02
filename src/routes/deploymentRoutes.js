@@ -16,7 +16,7 @@ router.get('/:id/history', deploymentController.getDeploymentHistory);
 
 // Monitoring & Logs
 router.get('/:id/logs', deploymentController.getDeploymentLogs);
-router.get('/:id/history', deploymentController.getDeploymentHistory);
+
 router.post('/:id/scale', deploymentController.scaleDeployment);
 router.post('/:id/stop', deploymentController.stopDeployment);
 router.delete('/:id', deploymentController.deleteDeployment);
