@@ -42,8 +42,8 @@ Write-Output "🔒 Successfully logged out."
 ```json
 {
   "name": "react-analytics",
-  "image": "nginx:alpine",
-  "version": "1.2.0",
+  "image": "nginx",
+  "version": "alpine",
   "targetPort": 80,
   "envVars": {
     "VITE_API_URL": "http://localhost:31234/proxy/inventory-api",
@@ -56,8 +56,8 @@ Write-Output "🔒 Successfully logged out."
 ```json
 {
   "name": "vue-store",
-  "image": "nginx:alpine",
-  "version": "0.9.5-beta",
+  "image": "nginx",
+  "version": "alpine",
   "targetPort": 80,
   "envVars": {
     "VITE_STORE_ID": "shop_99",
@@ -70,8 +70,8 @@ Write-Output "🔒 Successfully logged out."
 ```json
 {
   "name": "angular-admin",
-  "image": "nginx:alpine",
-  "version": "4.1.0",
+  "image": "nginx",
+  "version": "alpine",
   "targetPort": 80,
   "repoUrl": "https://github.com/angular/admin-portal.git",
   "postStartScript": "npm run start:prod",
@@ -86,8 +86,8 @@ Write-Output "🔒 Successfully logged out."
 ```json
 {
   "name": "svelte-landing",
-  "image": "nginx:alpine",
-  "version": "1.0.0",
+  "image": "nginx",
+  "version": "alpine",
   "targetPort": 80,
   "envVars": {
     "GA_TRACKING_ID": "UA-998877-1",
@@ -106,8 +106,8 @@ Copy and paste these directly into your PowerShell terminal to initialize the ba
 ```powershell
 $body = @{ 
     name = "inventory-api"; 
-    image = "nginx:alpine"; 
-    version = "2.4.0"; 
+    image = "nginx"; 
+    version = "alpine"; 
     targetPort = 80;
     envVars = @{ 
         DB_NAME = "inventory_db";
@@ -123,9 +123,9 @@ Invoke-RestMethod -Uri http://localhost:31234/api/deployments -Method Post -Body
 ### 2. Python Flask Billing Service
 ```powershell
 $body = @{ 
-    name = "billing-service"; 
-    image = "nginx:alpine"; 
-    version = "0.1.5"; 
+    name = "billing3-service"; 
+    image = "caddy"; 
+    version = "alpine"; 
     targetPort = 80;
     envVars = @{ 
         CURRENCY = "USD";
@@ -141,8 +141,8 @@ Invoke-RestMethod -Uri http://localhost:31234/api/deployments -Method Post -Body
 ```powershell
 $body = @{ 
     name = "order-processor"; 
-    image = "nginx:alpine"; 
-    version = "3.3.3"; 
+    image = "nginx"; 
+    version = "alpine"; 
     targetPort = 80;
     repoUrl = "https://github.com/corp/order-processor.git";
     postStartScript = "echo 'Order processor starting...'";
@@ -160,8 +160,8 @@ Invoke-RestMethod -Uri http://localhost:31234/api/deployments -Method Post -Body
 ```powershell
 $body = @{ 
     name = "auth-microservice"; 
-    image = "nginx:alpine"; 
-    version = "5.0.0-GA"; 
+    image = "nginx"; 
+    version = "alpine"; 
     targetPort = 80;
     postStartScript = "rm -rf /tmp/*";
     envVars = @{ 
@@ -173,3 +173,39 @@ $body = @{
 # Note: Using the $token from Section 0
 Invoke-RestMethod -Uri http://localhost:31234/api/deployments -Method Post -Body $body -ContentType "application/json" -Headers @{ Authorization = "Bearer $token" } | ConvertTo-Json
 ```
+
+
+
+
+Yes! Since the Container Deployment Manager uses standard Docker commands under the hood, you are not restricted to just nginx and alpine.
+
+You can use any public Docker image and tag available on Docker Hub. The system simply takes your image name and your version (which acts as the Docker tag) and combines them (e.g., image:version) to pull and run the container.
+
+Here are some popular options you can use instead of nginx:alpine:
+
+Web Servers
+
+Apache (HTTPD)
+"image": "httpd", "version": "alpine"
+
+Caddy (Modern web server with auto HTTPS capabilities)
+"image": "caddy", "version": "alpine"
+
+Node.js (For running custom built Node apps)
+Node 18 Alpine
+"image": "node", "version": "18-alpine"
+
+You would use this with a repoUrl and a postStartScript (like npm install && npm start)
+
+Python (For Flask / Django / FastAPI apps)
+Python 3.10 Slim
+"image": "python", "version": "3.10-slim"
+
+Typically runs an installed script via postStartScript
+Databases/Caches (If you ever update the manager to support non-HTTP apps)
+
+Redis
+"image": "redis", "version": "alpine"
+PostgreSQL
+"image": "postgres", "version": "15-alpine"
+Why does it default to nginx:alpine in the dummy deployment script?

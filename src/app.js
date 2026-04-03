@@ -75,7 +75,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/proxy/:name", proxyMiddleware);
 
 // Catch-all for undefined API routes (Prevents the sendFile error)
-app.use("/api/*", (req, res) => {
+app.use("/api", (req, res) => {
   res.status(404).json({ error: `Route not found: ${req.method} ${req.originalUrl}. Please ensure you are using the correct HTTP method (e.g., POST instead of GET).` });
 });
 
