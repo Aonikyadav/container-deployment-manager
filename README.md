@@ -24,13 +24,17 @@ A sophisticated, multi-tenant container orchestration platform that executes **z
 ## 📸 Interface Showcases
 
 ### Command Center (Login Gateway)
-![Login Page Layout](docs/screenshots/login_page.png)
+![Login Page Layout](images/login-registration.png)
+
+### New Deployment Console
+![New Deployment Console](images/new-deployment.png)
 
 ### Main Dashboard (Deployment Orchestration Hub)
-![Main Dashboard Interface](docs/screenshots/dashboard.png)
+![Main Dashboard Interface](images/main-dashboard.png)
 
 ### Application Admin Console
-![Admin Privileged Console](docs/screenshots/admin_page.png)
+![Admin Privileged Console](images/admin-panel.jpeg)
+
 
 ---
 
