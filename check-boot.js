@@ -6,3 +6,7 @@ try {
 } catch (e) {
   fs.writeFileSync('node_crash_log.txt', e.message + '\n' + e.stdout?.toString() + '\n' + e.stderr?.toString());
 }
+
+
+
+

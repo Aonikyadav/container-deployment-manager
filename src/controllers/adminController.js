@@ -56,3 +56,4 @@ exports.getDetailedUsers = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+// updated auth logic
