@@ -105,4 +105,4 @@ exports.scaleDeployment = async (req, res) => {
   }
 };
 
-//deploymentController.js - updated auth logic
+//deploymentController.js - updated auth logicgit add src/routes/deploymentRoutes.js
