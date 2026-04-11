@@ -269,3 +269,4 @@ class DeploymentService {
 }
 
 module.exports = new DeploymentService();
+//deploymentService.js  is the core of the container deployment manager, handling all deployment lifecycle operations including creation, triggering, stopping, and deletion of deployments. It also manages the in-memory routing table for Blue-Green deployments and interacts with the Docker service to manage containers.

@@ -140,3 +140,5 @@ class DockerService {
 
 
 module.exports = new DockerService();
+
+//dockerService.js provides a set of methods to interact with Docker, including running, stopping, removing, inspecting containers, and pulling images. It uses the child_process module to execute Docker CLI commands and handles errors gracefully, providing informative logs for debugging.
