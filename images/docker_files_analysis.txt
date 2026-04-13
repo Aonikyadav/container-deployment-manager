@@ -1,0 +1,28 @@
+Docker Related Files Analysis
+
+1.  **docker-compose.yml**
+    *   **Path:** \docker-compose.yml
+    *   **Role:** This is the primary Docker orchestrator for the project infrastructure itself. It defines three distinct services needed for the application environment:
+        *   **mongodb:** Spins up a MongoDB instance (mongo:latest) mapped to port 27017, with a persistent volume named 'mongo_data' for database storage.
+        *   **backend:** Defines the Node.js backend service, instructing Docker to build it using a file named 'Dockerfile.backend' context based in the root directory. It depends on 'mongodb' and maps port 3000 to the host.
+        *   **frontend:** Defines the UI components, expecting a build via 'Dockerfile.frontend'. It passes environment variables like VITE_API_BASE_URL and sets up port 5173, declaring dependency on the 'backend'.
+    *   **Note on missing files:** The docker-compose.yml refers to Dockerfile.backend and Dockerfile.frontend. It appears these specific Dockerfiles are currently missing from the directory structure based on the file search, indicating that docker-compose up might fail if attempting to build the local proxy/manager project natively with Docker.
+
+2.  **src/services/dockerService.js**
+    *   **Path:** \src\services\dockerService.js
+    *   **Role:** This is a core Node.js backend module acting as the bridge between the Container Deployment Manager application and the host operating system's Docker engine.
+    *   **Functionality:** It executes raw Docker CLI commands via Node's child_process.exec. Methods include:
+        *   runContainer(): Assembles the docker run command with environment variables and port mappings.
+        *   pullImage(): Checks if an image exists locally; if not, pulls it (docker pull).
+        *   stopContainer(), removeContainer(): Manages standard lifecycle operations.
+        *   execCommand(), getLogs(), inspectContainer(): Provides visibility and interaction into mapped containers.
+        *   checkDocker(): Validates that the Docker engine is running on the host system.
+    *   **Significance:** This file is the operational heart of the application, managing user deployments directly through the host's Docker socket/CLI.
+
+3.  **docker-out.txt**
+    *   **Path:** \docker-out.txt
+    *   **Role:** A localized log or error output file.
+    *   **Contents:** Currently holds an error trace regarding a failing docker ps execution, citing an invalid or unsupported Docker API version via the Docker Desktop Linux Engine pipeline route. This looks to be an artifact of debugging an internal server error relating to Docker operations on Windows.
+
+Summary: The deployment manager itself uses docker-compose to define its own stack (mongo, backend, frontend - though explicit Dockerfiles for the apps are missing). Operationally, it relies heavily on dockerService.js to actually execute docker commands on behalf of user requests to deploy container images.
+

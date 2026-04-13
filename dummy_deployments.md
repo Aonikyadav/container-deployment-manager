@@ -9,6 +9,21 @@ Use these JSON payloads and PowerShell commands to test the `/api/deployments` e
 
 Before you can create any deployments via PowerShell, you must authenticate to get a token.
 
+### 0. Register a New Admin User (Optional)
+If you don't have an account yet, you can register and receive a token immediately.
+```powershell
+$registerBody = @{
+    username = "tommy"   
+    email = "tommy@gmail.com"        
+    password = "123456789"
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod -Uri http://localhost:31234/api/auth/register -Method Post -Body $registerBody -ContentType "application/json"
+# NOW we extract the token from the response
+$token = $response.data.token
+Write-Output "✅ Success! Registered and token is saved in memory."
+```
+
 ### 1. Login to get a Session Token
 ```powershell
 $loginBody = @{
@@ -159,7 +174,7 @@ Invoke-RestMethod -Uri http://localhost:31234/api/deployments -Method Post -Body
 ### 4. Java Spring Boot Auth
 ```powershell
 $body = @{ 
-    name = "auth-microservice"; 
+    name = "auth00-microservice"; 
     image = "nginx"; 
     version = "alpine"; 
     targetPort = 80;

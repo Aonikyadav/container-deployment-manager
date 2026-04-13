@@ -6,7 +6,7 @@ const deploymentSchema = new mongoose.Schema({
   image: { type: String, required: true },
   version: { type: String, required: true },
   envVars: { type: Map, of: String, default: {} },
-  targetPort: { type: Number, required: true }, // The port the app listens to inside the container
+  targetPort: { type: Number, required: true }, 
   replicas: { type: Number, default: 1 },
   status: { 
     type: String, 
@@ -18,11 +18,11 @@ const deploymentSchema = new mongoose.Schema({
     enum: ['none', 'blue', 'green'],
     default: 'none'
   },
-  activePorts: { type: [Number], default: [] }, // Ports exposed by proxy or the active replicas
-  bluePorts: { type: [Number], default: [] }, // Internal exposed ports for blue replicas
-  greenPorts: { type: [Number], default: [] }, // Internal exposed ports for green replicas
-  repoUrl: { type: String }, // Git repository URL for the project
-  postStartScript: { type: String } // Optional shell script to run after container is healthy
+  activePorts: { type: [Number], default: [] }, 
+  bluePorts: { type: [Number], default: [] }, 
+  greenPorts: { type: [Number], default: [] }, 
+  repoUrl: { type: String }, 
+  postStartScript: { type: String } 
 }, { timestamps: true });
 
 module.exports = mongoose.model("Deployment", deploymentSchema);

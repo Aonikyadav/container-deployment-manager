@@ -32,8 +32,7 @@ exports.triggerDeploy = async (req, res) => {
   try {
     const { id } = req.params;
     const { image, version } = req.body;
-    // We execute this synchronously in the response for simplicity, 
-    // but in reality this should be a background job tracking progress.
+   
     const deployment = await deploymentService.triggerDeployment(id, image, version);
     res.status(200).json({ message: 'Deployment completed successfully', data: deployment });
   } catch (error) {
