@@ -1,3 +1,5 @@
+// middlewares/authMiddleware.js
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -27,5 +29,5 @@ const admin = (req, res, next) => {
     res.status(403).json({ error: 'Not authorized as an administrator. Access denied. Only root admin is allowed.' });
   }
 };
-
 module.exports = { protect, admin };
+//middlware file
